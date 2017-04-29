@@ -72,16 +72,23 @@ html
                 addMarker(event.latLng, "N"); //N for new marker
             });
 
-            //receive message from the socket
-            ws.on('message', function(data, flags) {
+            //socket successfully connected
+            ws.onopen = function(event) {
                 // flags.binary will be set if a binary data is received.
                 // flags.masked will be set if the data was masked.
-                console.log("received " + data);
-            });
+                console.log("websocket open");
+            };
+
+            //text received
+            ws.onmessage = function(event) {
+                console.log("REC: " + event.data);
+                sendSocketText("I received text");
+            }
         }
 
         function sendSocketText(text) {
-                ws.send(text);
+            console.log("SEND: " + text);
+            ws.send(text);
         }
 
 
