@@ -9,6 +9,9 @@ html
 
 
     script.
+        //var WebSocket = require('ws');
+        var ws;
+
         var map;
         var directions_service;
         var directionsDisplay;
@@ -36,6 +39,7 @@ html
         }
 
         function initMap() {
+            ws = new WebSocket('ws://127.0.0.1:3001');
             wardenLocations = new WardenLocations();
             /*
             var myLoc = {lat: -27.4698, lng: 153.0251 };
@@ -66,8 +70,25 @@ html
 
             map.addListener('click', function(event) {
                 addMarker(event.latLng, "N"); //N for new marker
-                console.log("clicked");
             });
+
+            //socket successfully connected
+            ws.onopen = function(event) {
+                // flags.binary will be set if a binary data is received.
+                // flags.masked will be set if the data was masked.
+                console.log("websocket open");
+            };
+
+            //text received
+            ws.onmessage = function(event) {
+                console.log("REC: " + event.data);
+                sendSocketText("I received text");
+            }
+        }
+
+        function sendSocketText(text) {
+            console.log("SEND: " + text);
+            ws.send(text);
         }
 
 
@@ -86,7 +107,6 @@ html
 
         // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
-            console.log("deleteing markers")
             clearMarkers();
             markers = [];
 
@@ -104,6 +124,11 @@ html
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(map);
             }
+        }
+
+        function submitMarkers() {
+            //send markers[]
+            sendSocketText("Text");
         }
 
 
