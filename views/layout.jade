@@ -4,7 +4,10 @@ html
     title Fire Warden
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css')
     script(src='/javascripts/global.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
   body
 
 
@@ -20,36 +23,32 @@ html
         var wardenLocations;
         var markers = [];
         var serverMarkers = [];
+        var currentMaker;
 
+        function formatDate(date) {
+          var monthNames = [
+            "Jan", "Feb", "Mar",
+            "Apr", "May", "Jun", "Jul",
+            "Aug", "Sep", "Oct",
+            "Nov", "Dec"
+          ];
 
-        function route() {
-            var start = brisbane;
-            var destination = chincilla;
-            var request = {
-                origin: start,
-                destination: destination,
-                travelMode: 'DRIVING'
-            };
+          var day = date.getDate();
+          var monthIndex = date.getMonth();
+          var year = date.getFullYear();
 
-            directions_service.route(request, function(result, status) {
-                if (status == 'OK') {
-                    directionsDisplay.setDirections(result);
-                }
-            });
+          return day + ' ' + monthNames[monthIndex] + ' ' + year;
         }
 
         function initMap() {
-            ws = new WebSocket('ws://127.0.0.1:3001');
-            wardenLocations = new WardenLocations();
-            /*
-            var myLoc = {lat: -27.4698, lng: 153.0251 };
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    console.log("Lat: " + position.coords.latitude + " Lng: " + position.coords.longitude);
-                    myLoc = position;
-                });
+            var url;
+            if (window.location.host.indexOf(":") > 0) {
+                url = window.location.host.split(":")[0];
+            } else {
+                url = window.location.host;
             }
-            */
+            ws = new WebSocket('ws://' + url + ":3001");
+            wardenLocations = new WardenLocations(ws);
             directions_service = new google.maps.DirectionsService();
             directionsDisplay =  new google.maps.DirectionsRenderer();
             chincilla = new google.maps.LatLng(-26.7554,150.6285);
@@ -59,18 +58,21 @@ html
               zoom: 8
             });
             wardenLocations.setMap(map);
-            wardenLocations.addFirePoint(chincilla);
             directionsDisplay.setMap(map);
             //Add marker on current location
 
-            /*marker = new google.maps.Marker({
-                position: myLoc,
-                map: map
-            });*/
-
             map.addListener('click', function(event) {
-                addMarker(event.latLng, "N"); //N for new marker
+                wardenLocations.addFirePoint(event.latLng);
+                $("#btnSubmit").addClass("btn-success");
+                $("#btnSubmit").removeClass("disabled");
             });
+
+            $(document).on('click','.dispatch-btn',function (event) {
+                wardenLocations.findNearestFirestation(
+                    wardenLocations.selectedMarker.getPosition()
+                );
+            });
+
 
             //socket successfully connected
             ws.onopen = function(event) {
@@ -79,63 +81,42 @@ html
                 console.log("websocket open");
             };
 
-            //text received
-            ws.onmessage = function(event) {
-                console.log("REC: " + event.data);
-                sendSocketText("I received text");
-            }
-        }
+            // Create the slider
+            var timeline = $("#timeline");
+            var date = new Date();
+            var timestamp = date.getTime() / 1000 / 60;
+            var day = 60*24;
 
-        function sendSocketText(text) {
-            console.log("SEND: " + text);
-            ws.send(text);
-        }
-
-
-        // Adds a marker to the map and push to the array.
-        function addMarker(location, label) {
-            var marker = new google.maps.Marker({
-                position: location,
-                label: label,
-                map: map
-            });
-            markers.push(marker);
-
-            $("#btnSubmit").addClass("btn-success");
-            $("#btnSubmit").removeClass("disabled");
+            timeline.slider({
+                id: "sldTimeline", 
+                value: timestamp,
+                ticks: [timestamp-day, timestamp, timestamp+day],
+                ticks_labels: ['-24H', date.toLocaleTimeString() + " " + formatDate(date), '+24H'],
+                ticks_snap_bounds: 20, // 10 minutes
+                formatter: function(value) {
+                    var tmpDate = new Date(value*1000*60);
+                    return tmpDate.toLocaleTimeString() + " " + formatDate(tmpDate);
+                },
+            })
+                .on('slide', function(value) {
+                    console.log('slide', value.value);
+                });
         }
 
         // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
-            clearMarkers();
-            markers = [];
-
+            wardenLocations.deleteFirePoints();
             $("#btnSubmit").removeClass("btn-success");
             $("#btnSubmit").addClass("disabled");
         }
 
-        // Removes the markers from the map, but keeps them in the array.
-        function clearMarkers() {
-            setMapOnAll(null);
-        }
-
-        // Sets the map on all markers in the array.
-        function setMapOnAll(map) {
-            for (var i = 0; i < markers.length; i++) {
-                markers[i].setMap(map);
-            }
-        }
-
         function submitMarkers() {
-            //send markers[]
-            var t = [];
-            for(i=0;i<markers.length;i++){
-                t.push(markers[i].getPosition());
-            }
-            sendSocketText(JSON.stringify(t));
+            wardenLocations.submitFirePoints();
         }
 
 
     block content
-    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js')
+    script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ&callback=initMap')
+    
