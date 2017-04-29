@@ -76,12 +76,25 @@ wss.on('connection', function connection(ws) {
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
   ws.on('message', function incoming(message) {
+	  var fires = JSON.parse(message);
+	  fires.forEach(function (fire) {
+		db.logFire(Date.now(),fire.lat,fire.lng);
+	  });
     console.log('received: %s', message);
   });
 
-  ws.send('something');
+	var fires = 
+	db.getAllFires(function (err,row) {
+		ws.send(JSON.stringify([ {
+			time: row["time"],
+			lat: row["latitude"],
+			lng: row["longitude"]
+		}]));
+		console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+	});
+  //ws.send(fires);
 });
 
-app.listen(3000);
+app.listen(3002);
 
 module.exports = app;
