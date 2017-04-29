@@ -10,6 +10,7 @@ html
     script.
         var map;
         var markers = [];
+        var serverMarkers = []
         function initMap() {
             var myLoc = {lat: -27.4698, lng: 153.0251 };
             if (navigator.geolocation) {
@@ -30,16 +31,17 @@ html
             });*/
 
             map.addListener('click', function(event) {
-                addMarker(event.latLng);
+                addMarker(event.latLng, "N"); //N for new marker
                 console.log("clicked");
             });
         }
 
 
         // Adds a marker to the map and push to the array.
-        function addMarker(location) {
+        function addMarker(location, label) {
             var marker = new google.maps.Marker({
                 position: location,
+                label: label,
                 map: map
             });
             markers.push(marker);
