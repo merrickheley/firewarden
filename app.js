@@ -43,4 +43,16 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+//send webpage on landing
+app.get('/',function(req,res){
+     res.sendFile('index.jade');
+});
+app.get('/#about',function(req,res){
+     res.sendFile('about.jade');
+});
+app.get('/#contact',function(req,res){
+     res.sendFile('contact.jade');
+});
+app.listen(3000);
+
 module.exports = app;
