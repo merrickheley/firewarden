@@ -34,15 +34,6 @@ html
         }
         function initMap() {
             wardenLocations = new WardenLocations();
-            /*
-            var myLoc = {lat: -27.4698, lng: 153.0251 };
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    console.log("Lat: " + position.coords.latitude + " Lng: " + position.coords.longitude);
-                    myLoc = position;
-                });
-            }
-            */
             directions_service = new google.maps.DirectionsService();
             directionsDisplay =  new google.maps.DirectionsRenderer();
             chincilla = new google.maps.LatLng(-26.7554,150.6285);
@@ -63,6 +54,7 @@ html
 
             map.addListener('click', function(event) {
                 addMarker(event.latLng);
+                wardenLocations.findNearestFirestation(event.latLng);
                 console.log("clicked");
             });
         }
