@@ -38,3 +38,4 @@ jspm_packages
 firewarden.db
 bin/
 obj/
+.vs/FireWarden/v15/.suo
