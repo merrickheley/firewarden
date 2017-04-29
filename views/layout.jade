@@ -7,6 +7,7 @@ html
     script(src='/javascripts/global.js')
   body
 
+
     script.
         var map;
         var directions_service;
@@ -14,13 +15,31 @@ html
         var chincilla;
         var brisbane;
         var wardenLocations;
-          function initMap() {
+        var markers = [];
+
+        function route() {
+            var start = brisbane;
+            var destination = chincilla;
+            var request = {
+                origin: start,
+                destination: destination,
+                travelMode: 'DRIVING'
+            };
+
+            directions_service.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsDisplay.setDirections(result);
+                }
+            });
+        }
+        function initMap() {
             wardenLocations = new WardenLocations();
-            //var loc = {lat: -27.4698, lng: 153.0251 };
             /*
+            var myLoc = {lat: -27.4698, lng: 153.0251 };
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
                     console.log("Lat: " + position.coords.latitude + " Lng: " + position.coords.longitude);
+                    myLoc = position;
                 });
             }
             */
@@ -35,23 +54,49 @@ html
             wardenLocations.setMap(map);
             wardenLocations.addFirePoint(chincilla);
             directionsDisplay.setMap(map);
+            //Add marker on current location
 
-          }
-            function route() {
-                var start = brisbane;
-                var destination = chincilla;
-                var request = {
-                    origin: start,
-                    destination: destination,
-                    travelMode: 'DRIVING'
-                };
+            /*marker = new google.maps.Marker({
+                position: myLoc,
+                map: map
+            });*/
 
-                directions_service.route(request, function(result, status) {
-                    if (status == 'OK') {
-                        directionsDisplay.setDirections(result);
-                    }
-                });
+            map.addListener('click', function(event) {
+                addMarker(event.latLng);
+                console.log("clicked");
+            });
+        }
+
+
+        // Adds a marker to the map and push to the array.
+        function addMarker(location) {
+            var marker = new google.maps.Marker({
+                position: location,
+                map: map
+            });
+            markers.push(marker);
+        }
+
+        // Deletes all markers in the array by removing references to them.
+        function deleteMarkers() {
+            console.log("deleteing markers")
+            clearMarkers();
+            markers = [];
+        }
+
+        // Removes the markers from the map, but keeps them in the array.
+        function clearMarkers() {
+            setMapOnAll(null);
+        }
+
+        // Sets the map on all markers in the array.
+        function setMapOnAll(map) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
             }
+        }
+
+
     block content
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ&callback=initMap')
