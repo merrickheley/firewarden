@@ -4,7 +4,9 @@ html
     title Fire Warden
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css')
     script(src='/javascripts/global.js')
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
   body
 
 
@@ -22,7 +24,6 @@ html
         var serverMarkers = [];
         var currentMaker;
 
-
         function route() {
             var start = brisbane;
             var destination = chincilla;
@@ -37,6 +38,21 @@ html
                     directionsDisplay.setDirections(result);
                 }
             });
+        }
+
+        function formatDate(date) {
+          var monthNames = [
+            "Jan", "Feb", "Mar",
+            "Apr", "May", "Jun", "Jul",
+            "Aug", "Sep", "Oct",
+            "Nov", "Dec"
+          ];
+
+          var day = date.getDate();
+          var monthIndex = date.getMonth();
+          var year = date.getFullYear();
+
+          return day + ' ' + monthNames[monthIndex] + ' ' + year;
         }
 
         function initMap() {
@@ -87,6 +103,27 @@ html
                 //sendSocketText("I received text");
             }
             */
+
+            // Create the slider
+            var timeline = $("#timeline");
+            var date = new Date();
+            var timestamp = date.getTime() / 1000 / 60;
+            var day = 60*24;
+
+            timeline.slider({
+                id: "sldTimeline", 
+                value: timestamp,
+                ticks: [timestamp-day, timestamp, timestamp+day],
+                ticks_labels: ['-24H', date.toLocaleTimeString() + " " + formatDate(date), '+24H'],
+                ticks_snap_bounds: 20, // 10 minutes
+                formatter: function(value) {
+                    var tmpDate = new Date(value*1000*60);
+                    return tmpDate.toLocaleTimeString() + " " + formatDate(tmpDate);
+                },
+            })
+                .on('slide', function(value) {
+                    console.log('slide', value.value);
+                });
         }
 
         /*
@@ -150,5 +187,6 @@ html
 
 
     block content
-    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js')
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ&callback=initMap')
+    
