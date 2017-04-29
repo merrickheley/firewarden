@@ -59,6 +59,10 @@ app.use(function(err, req, res, next) {
 var wss = new WebSocket.Server({server:"127.0.0.1", port:3001});
 console.log("created websocket");
 
+//List of all known fire locations with a timestamp
+var locations = [];
+
+
 //send webpage on landing
 app.get('/',function(req,res){
      res.sendFile('index.jade');
@@ -75,8 +79,29 @@ wss.on('connection', function connection(ws) {
   // You might use location.query.access_token to authenticate or share sessions
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
+  //run when a new message is received
   ws.on('message', function incoming(message) {
     console.log('received: %s', message);
+    try {
+      jmessage = JSON.parse(message);
+    } catch (err) {
+      console.log("Invalid text received");
+      return;
+    }
+    curTime = new Date().getTime();
+    for(var i in jmessage) {
+        /*var tlatlng = [];
+        for(var j in jmessage[i]) {
+
+        }*/
+        var tempLocation = {
+            lat: jmessage[i]["lat"],
+            lng: jmessage[i]["lng"],
+            time: curTime
+        }
+        locations.push(tempLocation);
+        console.log(tempLocation.lat, tempLocation.lng, tempLocation.time);
+    }
   });
 
   ws.send('something');
