@@ -5,6 +5,21 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
   body
+
+    script.
+        var map;
+          function initMap() {
+            //var loc = {lat: -27.4698, lng: 153.0251 };
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    console.log("Lat: " + position.coords.latitude + " Lng: " + position.coords.longitude);
+                });
+            }
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: {lat: -27.4698, lng: 153.0251 },
+              zoom: 8
+            });
+          }
     block content
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ&callback=initMap')
