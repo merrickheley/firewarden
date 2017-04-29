@@ -122,7 +122,11 @@ html
 
         function submitMarkers() {
             //send markers[]
-            sendSocketText("Text");
+            var t = [];
+            for(i=0;i<markers.length;i++){
+                t.push(markers[i].getPosition());
+            }
+            sendSocketText(JSON.stringify(t));
         }
 
 
