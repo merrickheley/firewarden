@@ -10,6 +10,14 @@ var users = require('./routes/users');
 
 var app = express();
 
+// Set up the database
+var db = require('./database').init();
+//db.logFire(123456857, 123.45, 67.89);
+//db.getAllFires();
+
+// Close the database. Good practice.
+// db.teardown();
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
