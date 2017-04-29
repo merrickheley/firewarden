@@ -9,6 +9,9 @@ html
 
 
     script.
+        //var WebSocket = require('ws');
+        var ws;
+
         var map;
         var directions_service;
         var directionsDisplay;
@@ -16,6 +19,8 @@ html
         var brisbane;
         var wardenLocations;
         var markers = [];
+        var serverMarkers = [];
+
 
         function route() {
             var start = brisbane;
@@ -32,7 +37,9 @@ html
                 }
             });
         }
+
         function initMap() {
+            ws = new WebSocket('ws://127.0.0.1:3001');
             wardenLocations = new WardenLocations();
             /*
             var myLoc = {lat: -27.4698, lng: 153.0251 };
@@ -62,26 +69,49 @@ html
             });*/
 
             map.addListener('click', function(event) {
-                addMarker(event.latLng);
-                console.log("clicked");
+                addMarker(event.latLng, "N"); //N for new marker
             });
+
+            //socket successfully connected
+            ws.onopen = function(event) {
+                // flags.binary will be set if a binary data is received.
+                // flags.masked will be set if the data was masked.
+                console.log("websocket open");
+            };
+
+            //text received
+            ws.onmessage = function(event) {
+                console.log("REC: " + event.data);
+                sendSocketText("I received text");
+            }
+        }
+
+        function sendSocketText(text) {
+            console.log("SEND: " + text);
+            ws.send(text);
         }
 
 
         // Adds a marker to the map and push to the array.
-        function addMarker(location) {
+        function addMarker(location, label) {
             var marker = new google.maps.Marker({
                 position: location,
+                label: label,
                 map: map
             });
             markers.push(marker);
+
+            $("#btnSubmit").addClass("btn-success");
+            $("#btnSubmit").removeClass("disabled");
         }
 
         // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
-            console.log("deleteing markers")
             clearMarkers();
             markers = [];
+
+            $("#btnSubmit").removeClass("btn-success");
+            $("#btnSubmit").addClass("disabled");
         }
 
         // Removes the markers from the map, but keeps them in the array.
@@ -94,6 +124,15 @@ html
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(map);
             }
+        }
+
+        function submitMarkers() {
+            //send markers[]
+            var t = [];
+            for(i=0;i<markers.length;i++){
+                t.push(markers[i].getPosition());
+            }
+            sendSocketText(JSON.stringify(t));
         }
 
 
