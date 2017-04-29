@@ -79,6 +79,9 @@ html
                 map: map
             });
             markers.push(marker);
+
+            $("#btnSubmit").addClass("btn-success");
+            $("#btnSubmit").removeClass("disabled");
         }
 
         // Deletes all markers in the array by removing references to them.
@@ -86,6 +89,9 @@ html
             console.log("deleteing markers")
             clearMarkers();
             markers = [];
+
+            $("#btnSubmit").removeClass("btn-success");
+            $("#btnSubmit").addClass("disabled");
         }
 
         // Removes the markers from the map, but keeps them in the array.
