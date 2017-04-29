@@ -1,17 +1,43 @@
 doctype html
 html
   head
-    title= FireWarden
+    title Fire Warden
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    script(src='/javascripts/global.js')
   body
 
 
     script.
         var map;
+        var directions_service;
+        var directionsDisplay;
+        var chincilla;
+        var brisbane;
+        var wardenLocations;
         var markers = [];
-        var serverMarkers = []
+        var serverMarkers = [];
+
+
+        function route() {
+            var start = brisbane;
+            var destination = chincilla;
+            var request = {
+                origin: start,
+                destination: destination,
+                travelMode: 'DRIVING'
+            };
+
+            directions_service.route(request, function(result, status) {
+                if (status == 'OK') {
+                    directionsDisplay.setDirections(result);
+                }
+            });
+        }
+
         function initMap() {
+            wardenLocations = new WardenLocations();
+            /*
             var myLoc = {lat: -27.4698, lng: 153.0251 };
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function (position) {
@@ -19,12 +45,20 @@ html
                     myLoc = position;
                 });
             }
+            */
+            directions_service = new google.maps.DirectionsService();
+            directionsDisplay =  new google.maps.DirectionsRenderer();
+            chincilla = new google.maps.LatLng(-26.7554,150.6285);
+            brisbane = new google.maps.LatLng(-27.4698,153.0251);
             map = new google.maps.Map(document.getElementById('map'), {
-                center: myLoc,
-                zoom: 8
+              center: wardenLocations.currentLocation,
+              zoom: 8
             });
-
+            wardenLocations.setMap(map);
+            wardenLocations.addFirePoint(chincilla);
+            directionsDisplay.setMap(map);
             //Add marker on current location
+
             /*marker = new google.maps.Marker({
                 position: myLoc,
                 map: map
@@ -70,4 +104,3 @@ html
     block content
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
     script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ&callback=initMap')
-    script(src='/javascripts/global.js')
