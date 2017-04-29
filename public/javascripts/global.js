@@ -1,13 +1,26 @@
 
 class WardenLocations {
-    constructor() {
+    constructor(socket) {
         //map = m;
+        this.socket = socket;
+        this.initSocket();
         this.calcLocation();
         this.firepoints = [];
         this.safepoints = [];
         this.firestations = []
         this.initSafepoints();
         this.initStations();
+    }
+
+    initSocket() {
+        var that = this;
+        this.socket.onmessage = function(event) {
+            var newPoints = JSON.parse(event.data);
+            newPoints.forEach(function (point) {
+                console.log("Adding Fire Point");
+                that.addFirePoint(point);
+            });
+        };
     }
 
     initSafepoints() {
@@ -68,13 +81,7 @@ class WardenLocations {
         });
     }
 
-
-
-    setMap(map) {
-        this.map = map;
-        var that = this;
-        this.directionsService = new google.maps.DirectionsService();
-        this.directionsDisplay =  new google.maps.DirectionsRenderer();
+    /*
         var image = {
               url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
               // This marker is 20 pixels wide by 32 pixels high.
@@ -83,6 +90,22 @@ class WardenLocations {
               origin: new google.maps.Point(0, 0),
               // The anchor for this image is the base of the flagpole at (0, 32).
               anchor: new google.maps.Point(0, 32)
+        };
+    */
+
+
+    setMap(map) {
+        this.map = map;
+        var that = this;
+        this.directionsService = new google.maps.DirectionsService();
+        this.directionsDisplay =  new google.maps.DirectionsRenderer();
+        var image = {
+              url: '/images/emergency_services_32x19.png',
+              size: new google.maps.Size(32, 19),
+              // The origin for this image is (0, 0).
+              origin: new google.maps.Point(0, 0),
+              // The anchor for this image is the base of the flagpole at (0, 32).
+              anchor: new google.maps.Point(16, 19)
         };
 
         this.firestations.forEach(function (position) {
@@ -93,18 +116,49 @@ class WardenLocations {
                 icon: image
             });
         });
+        this.infowindow = new google.maps.InfoWindow( {
+            content: document.getElementById('add_form'),
+            enableEventPropagation: true
+        });
     }
     get ReportedFirePoints() {
         return [];
     }
 
     addFirePoint(position) {
+        var image = {
+              url: '/images/Fire_Icon_Red_-_20x32.png',
+              size: new google.maps.Size(20, 32),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(10, 32)
+        };
         var marker = new google.maps.Marker( {
             position: position,
             map:this.map,
-            title: 'Potential Fire point'
+            title: 'Potential Fire point',
+            icon: image
+        });
+        var that = this;
+        google.maps.event.addListener(marker, 'click', function(event) {
+            that.selectedMarker = marker;
+            that.infowindow.open(that.map,marker);
         });
         this.firepoints.push(marker);
+    }
+
+    deleteFirePoints() {
+        this.firepoints.forEach(function (point) {
+            point.setMap(null);
+        });
+        this.firepoints = [];
+    }
+
+    submitFirePoints() {
+        var temp = [];
+        this.firepoints.forEach(function (point) {
+            temp.push(point.getPosition());
+        });
+        ws.send(JSON.stringify(temp));
     }
 
 

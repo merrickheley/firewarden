@@ -53,5 +53,5 @@ exports.logFire = function (timestamp, latitude, longitude) {
  *   of named [column=value] pairs.
  */
 exports.getAllFires = function (func) {
-    this.db.each("SELECT * FROM FireLog", callback(err, row));
+    this.db.each("SELECT * FROM FireLog", func);
 }

@@ -8,6 +8,10 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+const http = require('http');
+const url = require('url');
+const WebSocket = require('ws');
+
 var app = express();
 
 // Set up the database
@@ -51,6 +55,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+//Create websocket server
+var wss = new WebSocket.Server({server:"127.0.0.1", port:3001});
+console.log("created websocket");
+
 //send webpage on landing
 app.get('/',function(req,res){
      res.sendFile('index.jade');
@@ -61,6 +69,32 @@ app.get('/#about',function(req,res){
 app.get('/#contact',function(req,res){
      res.sendFile('contact.jade');
 });
-app.listen(3000);
+
+wss.on('connection', function connection(ws) {
+  const location = url.parse(ws.upgradeReq.url, true);
+  // You might use location.query.access_token to authenticate or share sessions
+  // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
+
+  ws.on('message', function incoming(message) {
+	  var fires = JSON.parse(message);
+	  fires.forEach(function (fire) {
+		db.logFire(Date.now(),fire.lat,fire.lng);
+	  });
+    console.log('received: %s', message);
+  });
+
+	var fires = 
+	db.getAllFires(function (err,row) {
+		ws.send(JSON.stringify([ {
+			time: row["time"],
+			lat: row["latitude"],
+			lng: row["longitude"]
+		}]));
+		console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+	});
+  //ws.send(fires);
+});
+
+app.listen(3002);
 
 module.exports = app;
