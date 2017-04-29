@@ -41,7 +41,13 @@ html
         }
 
         function initMap() {
-            ws = new WebSocket('ws://127.0.0.1:3001');
+            var url;
+            if (window.location.host.indexOf(":") > 0) {
+                url = window.location.host.split(":")[0];
+            } else {
+                url = window.location.host;
+            }
+            ws = new WebSocket('ws://' + url + ":3001");
             wardenLocations = new WardenLocations(ws);
             directions_service = new google.maps.DirectionsService();
             directionsDisplay =  new google.maps.DirectionsRenderer();
