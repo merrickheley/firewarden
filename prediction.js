@@ -11,6 +11,7 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 exports.initialise = function() {
+    console.log("asd");
   humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
   tempArray = readCSV("Temperaturelevel97500Pa.csv");
   windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
@@ -18,6 +19,7 @@ exports.initialise = function() {
 }
 
 exports.coolTests = function () {
+    return;
     console.log(humidityArray.length);
     console.log(humidityArray[0].length);
     console.log(getValue(-27,355, humidityArray));
@@ -52,10 +54,20 @@ function calcNewPosition(lat1, lon1, bearing, distance) {
 }
 
 function readCSV(path) {
-  var csv;
-  // fill in
-
-  return csv;
+    var data;
+    var csv = []
+    try {
+        data = fs.readFileSync(path, 'utf8');
+        lines = data.split("\n");
+        for(var i=0; i<lines.length;i++) {
+                csv.push(lines[i].split(","));
+            }
+    } catch(e) {
+        console.log('Error:', e.stack);
+        return;
+    }
+    console.log("Loaded: " + path);
+    return csv;
 }
 
 function getValue(lat, lon, array) {
