@@ -147,7 +147,7 @@ function predict(lat, lon, timeDifference, elevations) {
   humidity = getValue(lat, lon, humidityArray);
   temp = getValue(lat, lon, tempArray);
   windU = getValue(lat, lon, windUArray);
-  windV = getValue(lat, long, windVArray);
+  windV = getValue(lat, lon, windVArray);
 
   windSpeed = Math.sqrt(windU * windU + windV * windV);
   windBearing = Math.atan2(windU, windV) * 180 / Math.PI;
@@ -161,18 +161,16 @@ function predict(lat, lon, timeDifference, elevations) {
     // get slopes
     var slope = getSlope(elevations[0], elevations[i + 1], 50);
     // get wind in correct direction
-    var relativeWindSpeed = windSpeed * Math.cos(*windBearing - angle) * Math.PI / 180);
+    var relativeWindSpeed = windSpeed * Math.cos((windBearing - angle) * Math.PI / 180);
     // get rates
     var rate = getRate(getSlopeFactor(slope), temp, humidity, relativeWindSpeed);
     // get point as lat, lon
-    var newPoint = calcNewPosition(lat, lon, angle, rate * time);
+    var newPoint = calcNewPosition(lat, lon, angle, (rate/3.6) * timeDifference);
     points.push(newPoint);
     angle += 45;
   }
   return points;
 }
 exports.test = function () {
-  console.log(getSlope(55, 55, 50));
-  console.log(getSlope(60, 55, 50));
-  console.log(getSlope(50, 55, 50));
+
 };

@@ -101,8 +101,8 @@ html
                     return tmpDate.toLocaleTimeString() + " " + formatDate(tmpDate);
                 },
             })
-                .on('slide', function(value) {
-                    console.log('slide', value.value);
+                .on('slideStop', function(value) {
+                    console.log('slideStop', value.value);
                     wardenLocations.deleteFirePoints();
                     wardenLocations.requestFirePoints((timestamp-day)*1000*60, value.value*1000*60);
                 });

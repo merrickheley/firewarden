@@ -16,6 +16,10 @@ class WardenLocations {
         var that = this;
         this.socket.onmessage = function(event) {
             var data = JSON.parse(event.data);
+
+            if (data.points == undefined)
+                return;
+
             data.points.forEach(function (point) {
                 console.log("Adding Fire Point");
                 that.addFirePoint(point);
@@ -154,6 +158,7 @@ class WardenLocations {
             startTime: startTime,
             endTime: endTime,
         }));
+    }
 
     drawFirePolygon(points) {
         var poly = new google.maps.Polygon( {

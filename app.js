@@ -78,14 +78,23 @@ app.get('/#contact',function(req,res){
 });
 
 function sendFires(ws, startTime, endTime) {
-    return db.getAllFires(function (err, row) {
-        ws.send(JSON.stringify([{
-            time: row["time"],
-            lat: row["latitude"],
-            lng: row["longitude"]
-        }]));
-        console.log("T:" + (new Date(row["time"])).toLocaleString() + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
-    }, startTime, endTime); 
+    return db.getAllFires(function (err, rows) {
+        var fires = [];
+        rows.forEach(function (row) {
+            var fire = {
+                id: row["id"],
+                time: row["time"],
+                lat: row["latitude"],
+                lng: row["longitude"]
+            };
+            fires.push(fire);
+            console.log("T:" + (new Date(row["time"])).toLocaleString() + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+        });
+        ws.send(JSON.stringify({
+            points: fires,
+            polygons: [fires]
+        }));
+    }, startTime, endTime);
 }
 
 wss.on('connection', function connection(ws) {
@@ -112,26 +121,9 @@ wss.on('connection', function connection(ws) {
           });
           console.log('received: %s', message);
       }
-
   });
 
-	db.getAllFires(function (err,rows) {
-		var fires = [];
-		rows.forEach(function (row) {
-			var fire = {
-				id: row["id"],
-				time: row["time"],
-				lat: row["latitude"],
-				lng: row["longitude"]
-			};
-			fires.push(fire);
-			console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
-		});
-		ws.send(JSON.stringify( {
-			points: fires,
-			polygons: [fires]
-		}));
-	});
+	
 });
 
 predict.initialise();
