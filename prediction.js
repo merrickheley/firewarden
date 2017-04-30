@@ -127,13 +127,17 @@ function getSlopeFactor(angle) {
 }
 
 //Takes a position (with time data) and a time difference
-//and returns a list of point
+//and returns a list of points representing a polgon for fire spread
 function getPrediction(position, timediff,cb) {
     var ring = getPointsAroundPosition(position, 50);
+    var points;
     getElevation(ring).then(function (data) {
         console.log("asd");
         console.log(data);
+        points = predict(position.lat, position.lng, timediff, elevationdata);
     });
+
+    return points;
 }
 
 
