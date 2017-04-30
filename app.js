@@ -113,6 +113,8 @@ wss.on('connection', function connection(ws) {
           console.log('received: %s', message);
       }
 
+  });
+
 	db.getAllFires(function (err,rows) {
 		var fires = [];
 		rows.forEach(function (row) {

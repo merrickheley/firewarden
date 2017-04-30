@@ -15,7 +15,6 @@
     "serve-favicon": "~2.4.2",
     "sqlite3": "3.1.8",
     "ws": "2.3.1",
-	"@google/maps":"@0.3.1"
-
+	  "@google/maps":"0.3.1"
   }
 }
