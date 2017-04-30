@@ -74,8 +74,8 @@ class WardenLocations {
 
             }
             var request = {
-                origin: from,
-                destination: to,
+                origin: to,
+                destination: from,
                 travelMode: 'DRIVING'
             };
             that.directionsService.route(request, function(result, status) {
