@@ -78,7 +78,7 @@ app.get('/#contact',function(req,res){
 });
 
 function sendFires(ws, startTime, endTime) {
-    return db.getAllFires(function (err, rows) {
+    return db.getFiresForTimePeriod(function (err, rows) {
         var fires = [];
         rows.forEach(function (row) {
             var fire = {

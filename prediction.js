@@ -161,7 +161,7 @@ function predict(lat, lon, timeDifference, elevations) {
     // get slopes
     var slope = getSlope(elevations[0]["elevation"], elevations[i + 1]["elevation"], 50);
     // get wind in correct direction
-    var relativeWindSpeed = windSpeed * Math.cos((windBearing - angle) * Math.PI / 180);
+    var relativeWindSpeed = windSpeed * Math.cos(windBearing - angle) * (Math.PI / 180);
     // get rates
     var rate = getRate(getSlopeFactor(slope), temp, humidity, relativeWindSpeed);
     // get point as lat, lon
