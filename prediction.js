@@ -11,6 +11,7 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 exports.initialise = function() {
+    console.log("asd");
   humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
   tempArray = readCSV("Temperaturelevel97500Pa.csv");
   windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
@@ -18,6 +19,7 @@ exports.initialise = function() {
 }
 
 exports.coolTests = function () {
+    return;
     console.log(humidityArray.length);
     console.log(humidityArray[0].length);
     console.log(getValue(-27,355, humidityArray));
@@ -46,14 +48,25 @@ function calcNewPosition(lat1, lon1, bearing, distance) {
             Math.cos(lat1), Math.cos(distance/R)-
             Math.sin(lat1)*Math.sin(lat2));
   //console.log("stuff: " + Math.sin(bearing * Math.PI/180), Math.sin(distance/R))
-  return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+  return {lat:(lat2 * 180 / Math.PI), lng:(lon2 * 180 / Math.PI)};
+
 }
 
 function readCSV(path) {
-  var csv;
-  // fill in
-
-  return csv;
+    var data;
+    var csv = []
+    try {
+        data = fs.readFileSync(path, 'utf8');
+        lines = data.split("\n");
+        for(var i=0; i<lines.length;i++) {
+                csv.push(lines[i].split(","));
+            }
+    } catch(e) {
+        console.log('Error:', e.stack);
+        return;
+    }
+    console.log("Loaded: " + path);
+    return csv;
 }
 
 function getValue(lat, lon, array) {
@@ -73,6 +86,14 @@ function getRate(slopeFactor, temp, humidity, windSpeed) {
   var k=2*(Math.exp((0.987*Math.log(h+0.001))-0.45-(0.0345*c)+(0.0338*b)+(0.0234*d)));
 
   return rate = 0.0012 * k * slopeFactor * fuelLoad;
+}
+
+function getPointsAroundPosition(pos, dist) {
+    var points = [];
+    for(angle = 0; angle<360; angle+=45) {
+        points.push(calcNewPosition(pos.lat, pos.lng, angle, dist));
+    }
+    return points;
 }
 
 // Needs to be enconded as [{ lat: lat, lng: }]
