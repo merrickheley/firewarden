@@ -17,6 +17,9 @@ var app = express();
 
 // Set up the database
 var db = require('./database').init();
+
+
+
 //db.logFire(123456857, 123.45, 67.89);
 //db.getAllFires();
 
@@ -89,19 +92,28 @@ wss.on('connection', function connection(ws) {
     console.log('received: %s', message);
   });
 
-	var fires =
-	db.getAllFires(function (err,row) {
-		ws.send(JSON.stringify([ {
-			time: row["time"],
-			lat: row["latitude"],
-			lng: row["longitude"]
-		}]));
-		console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+	db.getAllFires(function (err,rows) {
+		var fires = [];
+		rows.forEach(function (row) {
+			var fire = {
+				id: row["id"],
+				time: row["time"],
+				lat: row["latitude"],
+				lng: row["longitude"]
+			};
+			fires.push(fire);
+			console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+		});
+		ws.send(JSON.stringify( {
+			points: fires,
+			polygons: [fires]
+		}));
 	});
   //ws.send(fires);
 });
 
 predict.initialise();
+predict.coolTests();
 
 app.listen(3002);
 

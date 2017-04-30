@@ -3,11 +3,24 @@ var tempArray;
 var windUArray;
 var windVArray;
 
-function initialise() {
-  humidityArray = readCSV("data/Relativehumiditylevel97500PA.csv");
-  tempArray = readCSV("data/Temparaturelevel97500Pa.csv");
-  windUArray = readCSV("data/Ucomponentofwindlevel97500PA.csv");
-  windVArray = readCSV("data/Vcomponentofwindlevel97500.csv");
+
+var fs = require('fs');
+
+var googleMapsClient = require('@google/maps').createClient({
+  key: 'AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ'
+});
+
+exports.initialise = function() {
+  humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
+  tempArray = readCSV("Temperaturelevel97500Pa.csv");
+  windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
+  windVArray = readCSV("Vcomponentofwindlevel97500Pa.csv");
+}
+
+exports.coolTests = function () {
+    console.log(humidityArray.length);
+    console.log(humidityArray[0].length);
+    console.log(getValue(-27,355, humidityArray));
 }
 
 
@@ -45,7 +58,10 @@ function readCSV(path) {
 }
 
 function getValue(lat, lon, array) {
-  return array[Math.floor(lat)][Math.floor(lon)];
+    if(lat < -90 | lat > 90 | lon < 0 | lon > 360) {
+        console.log("lat,long out of bounds:",lat,lon);
+    }
+  return array[Math.floor(lat+90)][Math.floor(lon)];
 }
 
 function getRate(slopeFactor, temp, humidity, windSpeed) {
@@ -60,10 +76,17 @@ function getRate(slopeFactor, temp, humidity, windSpeed) {
   return rate = 0.0012 * k * slopeFactor * fuelLoad;
 }
 
-function getElevation() {
+// Needs to be enconded as [{ lat: lat, lng: }]
+function getElevation(latLngs) {
   // go to google and get elevation in m
-
-  return 0;
+	return new Promise(function (resolve,reject) {
+		googleMapsClient.elevation(
+			latLngs,
+			function (err,response) {
+				if (err) reject(err);
+				resolve(response);
+		});
+	});
 }
 
 function drawShape() {
