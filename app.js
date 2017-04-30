@@ -101,6 +101,8 @@ wss.on('connection', function connection(ws) {
   //ws.send(fires);
 });
 
+predict.initialise();
+
 app.listen(3002);
 
 module.exports = app;

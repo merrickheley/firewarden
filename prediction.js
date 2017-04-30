@@ -3,11 +3,15 @@ var tempArray;
 var windUArray;
 var windVArray;
 
-function initialise() {
-  humidityArray = readCSV("data/Relativehumiditylevel97500PA.csv");
-  tempArray = readCSV("data/Temparaturelevel97500Pa.csv");
-  windUArray = readCSV("data/Ucomponentofwindlevel97500PA.csv");
-  windVArray = readCSV("data/Vcomponentofwindlevel97500.csv");
+var fs = require('fs');
+
+exports.initialise = function() {
+  //console.log(__filename);
+  //console.log(__dirname);
+  humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
+  tempArray = readCSV("Temperaturelevel97500Pa.csv");
+  windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
+  windVArray = readCSV("Vcomponentofwindlevel97500Pa.csv");
 }
 
 
@@ -33,12 +37,23 @@ function calcNewPosition(lat1, lon1, bearing, distance) {
   return {lat2, lon2};
 
 }
-
+//This function uses 4 spaces
 function readCSV(path) {
-  var csv;
-  // fill in
-
-  return csv;
+    //path = __dirname + "/" + path;
+    var data;
+    var csv = []
+    try {
+        data = fs.readFileSync(path, 'utf8');
+        lines = data.split("\n");
+        for(var i=0; i<lines.length;i++) {
+            csv.push(lines[i].split(","));
+        }
+    } catch(e) {
+        console.log('Error:', e.stack);
+        return;
+    }
+    console.log("Loaded: " + path);
+    return csv;
 }
 
 function getValue(lat, lon, array) {
