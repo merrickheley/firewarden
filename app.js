@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var predict = require('./prediction')
 
 const http = require('http');
 const url = require('url');
@@ -83,7 +84,7 @@ wss.on('connection', function connection(ws) {
     console.log('received: %s', message);
   });
 
-	var fires = 
+	var fires =
 	db.getAllFires(function (err,row) {
 		ws.send(JSON.stringify([ {
 			time: row["time"],
