@@ -173,11 +173,11 @@ class WardenLocations {
         this.firepolygon.push(poly);
     }
 
-	deleteFirePolygon() {
+	deleteFirePolygons() {
         this.firepolygon.forEach(function (poly) {
             poly.setMap(null);
         });
-        this.firepoints = [];
+        this.firepolygon = [];
 	}
 
     deleteFirePoints() {
