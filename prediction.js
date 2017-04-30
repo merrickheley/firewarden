@@ -14,6 +14,12 @@ exports.initialise = function() {
   windVArray = readCSV("Vcomponentofwindlevel97500Pa.csv");
 }
 
+exports.coolTests = function () {
+    console.log(humidityArray.lenth);
+    console.log(humidityArray[0].lenth);
+
+}
+
 
 function calcDistance(lat1, lat2, lon1, lon2) {
   var R = 6371000; // m
