@@ -70,8 +70,8 @@ class WardenLocations {
 
             }
             var request = {
-                origin: from,
-                destination: to,
+                origin: to,
+                destination: from,
                 travelMode: 'DRIVING'
             };
             that.directionsService.route(request, function(result, status) {
@@ -148,6 +148,12 @@ class WardenLocations {
         });
         this.firepoints.push(marker);
     }
+
+    requestFirePoints(startTime, endTime) {
+        ws.send(JSON.stringify({
+            startTime: startTime,
+            endTime: endTime,
+        }));
 
     drawFirePolygon(points) {
         var poly = new google.maps.Polygon( {
