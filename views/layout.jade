@@ -104,6 +104,7 @@ html
                 .on('slideStop', function(value) {
                     console.log('slideStop', value.value);
                     wardenLocations.deleteFirePoints();
+                    wardenLocations.deleteFirePolygons();
                     wardenLocations.requestFirePoints((timestamp-day)*1000*60, value.value*1000*60);
                 });
         }
@@ -111,6 +112,7 @@ html
         // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
             wardenLocations.deleteFirePoints();
+            wardenLocations.deleteFirePolygons();
             $("#btnSubmit").removeClass("btn-success");
             $("#btnSubmit").addClass("disabled");
         }
