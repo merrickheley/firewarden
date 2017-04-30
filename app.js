@@ -89,13 +89,19 @@ function sendFires(ws, startTime, endTime) {
                 lng: row["longitude"]
             };
             fires.push(fire);
-            polygons.push(getPrediction({fire.lat, fire.lng}, (endTime-fire.time)/1000));
+				predict.getPrediction(fire, (endTime-fire.time)/5,function (data) {
+					console.log("Got pred");
+					ws.send(JSON.stringify({
+						points: [],
+						polygons: [data]
+					}))
+				});
             console.log("T:" + (new Date(row["time"])).toLocaleString() + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
         });
 
         ws.send(JSON.stringify({
             points: fires,
-            polygons: polygons
+            polygons: []
         }));
     }, startTime, endTime);
 }
@@ -130,7 +136,7 @@ wss.on('connection', function connection(ws) {
 });
 
 predict.initialise();
-predict.coolTests();
+//predict.coolTests();
 
 app.listen(3002);
 

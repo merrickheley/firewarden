@@ -17,9 +17,11 @@ exports.initialise = function() {
   windVArray = readCSV("Vcomponentofwindlevel97500Pa.csv");
 }
 
+/*
 exports.coolTests = function () {
     getPrediction({lat:-27,lng:30}, 3600);
 }
+*/
 
 function calcDistance(lat1, lat2, lon1, lon2) {
   var R = 6371000; // m
@@ -127,14 +129,15 @@ function getSlopeFactor(angle) {
 
 //Takes a position (with time data) and a time difference
 //and returns a list of points representing a polgon for fire spread
-function getPrediction(position, timediff,cb) {
+exports.getPrediction = function (position, timediff,cb) {
     var ring = getPointsAroundPosition(position, 50);
     var points;
     getElevation(ring).then(function (data) {
         var elevationdata = data["json"]["results"];
         //console.log("asd");
         //console.log(elevationdata);
-        points = predict(position.lat, position.lng, timediff, elevationdata);
+        cb(predict(position.lat, position.lng, timediff, elevationdata));
+
     });
     console.log(points);
     return points;
