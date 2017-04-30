@@ -86,29 +86,9 @@ wss.on('connection', function connection(ws) {
 		db.logFire(Date.now(),fire.lat,fire.lng);
 	  });
     console.log('received: %s', message);
-    try {
-      jmessage = JSON.parse(message);
-    } catch (err) {
-      console.log("Invalid text received");
-      return;
-    }
-    curTime = new Date().getTime();
-    for(var i in jmessage) {
-        /*var tlatlng = [];
-        for(var j in jmessage[i]) {
-
-        }*/
-        var tempLocation = {
-            lat: jmessage[i]["lat"],
-            lng: jmessage[i]["lng"],
-            time: curTime
-        }
-        locations.push(tempLocation);
-        console.log(tempLocation.lat, tempLocation.lng, tempLocation.time);
-    }
   });
 
-	var fires = 
+	var fires =
 	db.getAllFires(function (err,row) {
 		ws.send(JSON.stringify([ {
 			time: row["time"],
