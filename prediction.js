@@ -25,7 +25,6 @@ exports.coolTests = function () {
     console.log(getValue(-27,355, humidityArray));
 }
 
-
 function calcDistance(lat1, lat2, lon1, lon2) {
   var R = 6371000; // m
   var dLat = (lat2 - lat1) * Math.PI/180;
@@ -114,11 +113,10 @@ function drawShape() {
 
 }
 
-function getSlope(lat, lon, bearing) {
-  var elev1 = getElevation(lat1, lon1);
-  var pos2 = calcNewPosition(lat, lon, bearing, 50);
-  var elev2 = getElevation(pos2[0], pos2[1]);
-  return 0;
+function getSlope(elev1, elev2, distance) {
+  var diff = elev2 - elev1;
+  console.log(diff)
+  return Math.atan2(diff, distance) * 180 / Math.PI;
 }
 
 function getSlopeFactor(angle) {
@@ -129,7 +127,7 @@ function getSlopeFactor(angle) {
   }
 }
 
-function predict(lat, lon, timeDifference) {
+function predict(lat, lon, timeDifference, elevations) {
   // get VALUES
   var humidity, temp, windU, windV, windSpeed, windBearing;
   humidity = getValue(lat, lon, humidityArray);
@@ -143,17 +141,24 @@ function predict(lat, lon, timeDifference) {
   var angle = 0;
   // get slopes
 
-  var slopes = [];
+  var points = [];
 
   for(var i = 0; i < 8; ++i) {
     // get slopes
-    var slope = getSlope(lat, lon, angle);
+    var slope = getSlope(elevations[0], elevations[i + 1], 50);
+    // get wind in correct direction
+    var relativeWindSpeed = windSpeed * Math.cos(*windBearing - angle) * Math.PI / 180);
     // get rates
-
+    var rate = getRate(getSlopeFactor(slope), temp, humidity, relativeWindSpeed);
     // get point as lat, lon
+    var newPoint = calcNewPosition(lat, lon, angle, rate * time);
+    points.push(newPoint);
+    angle += 45;
   }
+  return points;
 }
 exports.test = function () {
-
-
+  console.log(getSlope(55, 55, 50));
+  console.log(getSlope(60, 55, 50));
+  console.log(getSlope(50, 55, 50));
 };
