@@ -127,13 +127,17 @@ function getSlopeFactor(angle) {
 }
 
 //Takes a position (with time data) and a time difference
-//and returns a list of point
+//and returns a list of points representing a polgon for fire spread
 function getPrediction(position, timediff,cb) {
     var ring = getPointsAroundPosition(position, 50);
+    var points;
     getElevation(ring).then(function (data) {
         console.log("asd");
         console.log(data);
+        points = predict(position.lat, position.lng, timediff, elevationdata);
     });
+
+    return points;
 }
 
 
@@ -143,7 +147,7 @@ function predict(lat, lon, timeDifference, elevations) {
   humidity = getValue(lat, lon, humidityArray);
   temp = getValue(lat, lon, tempArray);
   windU = getValue(lat, lon, windUArray);
-  windV = getValue(lat, long, windVArray);
+  windV = getValue(lat, lon, windVArray);
 
   windSpeed = Math.sqrt(windU * windU + windV * windV);
   windBearing = Math.atan2(windU, windV) * 180 / Math.PI;
@@ -161,14 +165,12 @@ function predict(lat, lon, timeDifference, elevations) {
     // get rates
     var rate = getRate(getSlopeFactor(slope), temp, humidity, relativeWindSpeed);
     // get point as lat, lon
-    var newPoint = calcNewPosition(lat, lon, angle, rate * time);
+    var newPoint = calcNewPosition(lat, lon, angle, (rate/3.6) * timeDifference);
     points.push(newPoint);
     angle += 45;
   }
   return points;
 }
 exports.test = function () {
-  console.log(getSlope(55, 55, 50));
-  console.log(getSlope(60, 55, 50));
-  console.log(getSlope(50, 55, 50));
+
 };
