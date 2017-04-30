@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var predict = require('./prediction')
 
 const http = require('http');
 const url = require('url');
