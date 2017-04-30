@@ -154,6 +154,7 @@ class WardenLocations {
             startTime: startTime,
             endTime: endTime,
         }));
+	}
 
     drawFirePolygon(points) {
         var poly = new google.maps.Polygon( {
