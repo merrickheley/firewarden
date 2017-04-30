@@ -15,9 +15,9 @@ exports.initialise = function() {
 }
 
 exports.coolTests = function () {
-    console.log(humidityArray.lenth);
-    console.log(humidityArray[0].lenth);
-
+    console.log(humidityArray.length);
+    console.log(humidityArray[0].length);
+    console.log(getValue(-27,355, humidityArray));
 }
 
 
@@ -63,7 +63,10 @@ function readCSV(path) {
 }
 
 function getValue(lat, lon, array) {
-  return array[Math.floor(lat)][Math.floor(lon)];
+    if(lat < -90 | lat > 90 | lon < 0 | lon > 360) {
+        console.log("lat,long out of bounds:",lat,lon);
+    }
+  return array[Math.floor(lat+90)][Math.floor(lon)];
 }
 
 function getRate(slopeFactor, temp, humidity, windSpeed) {

@@ -102,6 +102,7 @@ wss.on('connection', function connection(ws) {
 });
 
 predict.initialise();
+predict.coolTests();
 
 app.listen(3002);
 
