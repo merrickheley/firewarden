@@ -1,11 +1,11 @@
 
 class WardenLocations {
     constructor(socket) {
-        //map = m;
         this.socket = socket;
         this.initSocket();
         this.calcLocation();
         this.firepoints = [];
+        this.firepolygon = [];
         this.safepoints = [];
         this.firestations = []
         this.initSafepoints();
@@ -15,11 +15,14 @@ class WardenLocations {
     initSocket() {
         var that = this;
         this.socket.onmessage = function(event) {
-            var newPoints = JSON.parse(event.data);
-            newPoints.forEach(function (point) {
+            var data = JSON.parse(event.data);
+            data.points.forEach(function (point) {
                 console.log("Adding Fire Point");
                 that.addFirePoint(point);
             });
+			data.polygons.forEach(function (poly) {
+				that.drawFirePolygon(poly);
+			});
         };
     }
 
@@ -100,7 +103,7 @@ class WardenLocations {
         this.directionsService = new google.maps.DirectionsService();
         this.directionsDisplay =  new google.maps.DirectionsRenderer();
         var image = {
-              url: '/images/emergency_services_32x19.png',
+              url: '/images/emergency_services_red_32x19.png',
               size: new google.maps.Size(32, 19),
               // The origin for this image is (0, 0).
               origin: new google.maps.Point(0, 0),
@@ -127,14 +130,14 @@ class WardenLocations {
 
     addFirePoint(position) {
         var image = {
-              url: '/images/Fire_Icon_Red_-_20x32.png',
+              url: '/images/Fire_Icon_OJ_-_20x32.png',
               size: new google.maps.Size(20, 32),
               origin: new google.maps.Point(0, 0),
               anchor: new google.maps.Point(10, 32)
         };
         var marker = new google.maps.Marker( {
             position: position,
-            map:this.map,
+            map: this.map,
             title: 'Potential Fire point',
             icon: image
         });
@@ -144,6 +147,19 @@ class WardenLocations {
             that.infowindow.open(that.map,marker);
         });
         this.firepoints.push(marker);
+    }
+
+    drawFirePolygon(points) {
+        var poly = new google.maps.Polygon( {
+            paths:points,
+            strokeColor:'#fdb617',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#fdb617',
+            fillOpacity: 0.35
+        });
+        poly.setMap(this.map);
+        this.firepolygon.push(poly);
     }
 
     deleteFirePoints() {
