@@ -18,7 +18,7 @@ exports.initialise = function() {
 }
 
 exports.coolTests = function () {
-    console.log(getPrediction({lat:-27,lng:30}, 3600));
+    getPrediction({lat:-27,lng:30}, 3600);
 }
 
 function calcDistance(lat1, lat2, lon1, lon2) {
@@ -114,7 +114,6 @@ function drawShape() {
 
 function getSlope(elev1, elev2, distance) {
   var diff = elev2 - elev1;
-  console.log(diff)
   return Math.atan2(diff, distance) * 180 / Math.PI;
 }
 
@@ -127,13 +126,18 @@ function getSlopeFactor(angle) {
 }
 
 //Takes a position (with time data) and a time difference
-//and returns a list of point
+//and returns a list of points representing a polgon for fire spread
 function getPrediction(position, timediff,cb) {
     var ring = getPointsAroundPosition(position, 50);
+    var points;
     getElevation(ring).then(function (data) {
-        console.log("asd");
-        console.log(data);
+        var elevationdata = data["json"]["results"];
+        //console.log("asd");
+        //console.log(elevationdata);
+        points = predict(position.lat, position.lng, timediff, elevationdata);
     });
+    console.log(points);
+    return points;
 }
 
 
@@ -155,14 +159,15 @@ function predict(lat, lon, timeDifference, elevations) {
 
   for(var i = 0; i < 8; ++i) {
     // get slopes
-    var slope = getSlope(elevations[0], elevations[i + 1], 50);
+    var slope = getSlope(elevations[0]["elevation"], elevations[i + 1]["elevation"], 50);
     // get wind in correct direction
-    var relativeWindSpeed = windSpeed * Math.cos((windBearing - angle) * Math.PI / 180);
+    var relativeWindSpeed = windSpeed * Math.cos(windBearing - angle) * (Math.PI / 180);
     // get rates
     var rate = getRate(getSlopeFactor(slope), temp, humidity, relativeWindSpeed);
     // get point as lat, lon
     var newPoint = calcNewPosition(lat, lon, angle, (rate/3.6) * timeDifference);
     points.push(newPoint);
+    console.log(newPoint);
     angle += 45;
   }
   return points;

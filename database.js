@@ -52,8 +52,8 @@ exports.logFire = function (timestamp, latitude, longitude) {
  * Get all the fires from the database. This will be formatted as a dictionary
  *   of named [column=value] pairs.
  */
-exports.getAllFires = function (func, startTime, endTime) {
-    this.db.each("SELECT * FROM FireLog WHERE time BETWEEN " + startTime +
+exports.getFiresForTimePeriod = function (func, startTime, endTime) {
+    this.db.all("SELECT * FROM FireLog WHERE time BETWEEN " + startTime +
         " AND " + endTime + ";", func);
 }
 
