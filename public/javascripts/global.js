@@ -146,6 +146,13 @@ class WardenLocations {
         this.firepoints.push(marker);
     }
 
+    requestFirePoints(startTime, endTime) {
+        ws.send(JSON.stringify({
+            startTime: startTime,
+            endTime: endTime,
+        }));
+    }
+
     deleteFirePoints() {
         this.firepoints.forEach(function (point) {
             point.setMap(null);

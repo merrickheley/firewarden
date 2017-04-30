@@ -19,7 +19,7 @@ exports.init = function () {
     this.db = new sqlite3.Database('firewarden.db');
 
     // Create the db table if it doesn't exist
-    this.db.run("CREATE TABLE IF NOT EXISTS FireLog (\
+    this.db.exec("CREATE TABLE IF NOT EXISTS FireLog (\
                         id INTEGER PRIMARY KEY AUTOINCREMENT, \
                         time INTEGER NOT NULL, \
                         latitude DOUBLE NOT NULL, \
@@ -52,6 +52,7 @@ exports.logFire = function (timestamp, latitude, longitude) {
  * Get all the fires from the database. This will be formatted as a dictionary
  *   of named [column=value] pairs.
  */
-exports.getAllFires = function (func) {
-    this.db.each("SELECT * FROM FireLog", func);
+exports.getAllFires = function (func, startTime, endTime) {
+    this.db.each("SELECT * FROM FireLog WHERE time BETWEEN " + startTime +
+        " AND " + endTime + ";", func);
 }
