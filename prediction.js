@@ -5,6 +5,10 @@ var windVArray;
 
 var fs = require('fs');
 
+var googleMapsClient = require('@google/maps').createClient({
+  key: 'AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ'
+});
+
 exports.initialise = function() {
   //console.log(__filename);
   //console.log(__dirname);
@@ -72,10 +76,17 @@ function getRate(slopeFactor, temp, humidity, windSpeed) {
   return rate = 0.0012 * k * slopeFactor * fuelLoad;
 }
 
-function getElevation() {
+// Needs to be enconded as [{ lat: lat, lng: }]
+function getElevation(latLngs) {
   // go to google and get elevation in m
-
-  return 0;
+	return new Promise(function (resolve,reject) {
+		googleMapsClient.elevation(
+			latLngs,
+			function (err,response) {
+				if (err) reject(err);
+				resolve(response);
+		});
+	});
 }
 
 function drawShape() {

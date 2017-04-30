@@ -19,9 +19,6 @@ var app = express();
 var db = require('./database').init();
 
 
-var googleMapsClient = require('@google/maps').createClient({
-  key: 'AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ'
-});
 
 //db.logFire(123456857, 123.45, 67.89);
 //db.getAllFires();
