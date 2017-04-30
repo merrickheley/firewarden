@@ -16,6 +16,10 @@ class WardenLocations {
         var that = this;
         this.socket.onmessage = function(event) {
             var data = JSON.parse(event.data);
+
+            if (data.points == undefined)
+                return;
+
             data.points.forEach(function (point) {
                 console.log("Adding Fire Point");
                 that.addFirePoint(point);
@@ -154,7 +158,7 @@ class WardenLocations {
             startTime: startTime,
             endTime: endTime,
         }));
-	}
+    }
 
     drawFirePolygon(points) {
         var poly = new google.maps.Polygon( {
@@ -168,6 +172,13 @@ class WardenLocations {
         poly.setMap(this.map);
         this.firepolygon.push(poly);
     }
+
+	deleteFirePolygon() {
+        this.firepolygon.forEach(function (poly) {
+            poly.setMap(null);
+        });
+        this.firepoints = [];
+	}
 
     deleteFirePoints() {
         this.firepoints.forEach(function (point) {

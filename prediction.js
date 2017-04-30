@@ -11,7 +11,6 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 exports.initialise = function() {
-    console.log("asd");
   humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
   tempArray = readCSV("Temperaturelevel97500Pa.csv");
   windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
@@ -19,10 +18,7 @@ exports.initialise = function() {
 }
 
 exports.coolTests = function () {
-    return;
-    console.log(humidityArray.length);
-    console.log(humidityArray[0].length);
-    console.log(getValue(-27,355, humidityArray));
+    console.log(getPrediction({lat:-27,lng:30}, 3600));
 }
 
 function calcDistance(lat1, lat2, lon1, lon2) {
@@ -90,6 +86,7 @@ function getRate(slopeFactor, temp, humidity, windSpeed) {
 
 function getPointsAroundPosition(pos, dist) {
     var points = [];
+    points.push(pos);
     for(angle = 0; angle<360; angle+=45) {
         points.push(calcNewPosition(pos.lat, pos.lng, angle, dist));
     }
@@ -128,6 +125,17 @@ function getSlopeFactor(angle) {
     return Math.exp(-0.069 * angle) / (2 * Math.exp(-0.069 * angle) - 1)
   }
 }
+
+//Takes a position (with time data) and a time difference
+//and returns a list of point
+function getPrediction(position, timediff,cb) {
+    var ring = getPointsAroundPosition(position, 50);
+    getElevation(ring).then(function (data) {
+        console.log("asd");
+        console.log(data);
+    });
+}
+
 
 function predict(lat, lon, timeDifference, elevations) {
   // get VALUES
