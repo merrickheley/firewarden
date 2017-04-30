@@ -3,6 +3,7 @@ var tempArray;
 var windUArray;
 var windVArray;
 
+
 var fs = require('fs');
 
 var googleMapsClient = require('@google/maps').createClient({
@@ -10,8 +11,6 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 exports.initialise = function() {
-  //console.log(__filename);
-  //console.log(__dirname);
   humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
   tempArray = readCSV("Temperaturelevel97500Pa.csv");
   windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
@@ -39,31 +38,24 @@ function calcDistance(lat1, lat2, lon1, lon2) {
 
 function calcNewPosition(lat1, lon1, bearing, distance) {
   var R = 6371000; // m
-  var lat2 = Math.asin( Math.sin(lat1 * Math.PI/180)*Math.cos(distance/R) +
-            Math.cos(lat1 * Math.PI/180)*Math.sin(distance/R)*
+  lat1 = lat1 * Math.PI / 180;
+  lon1 = lon1 * Math.PI / 180;
+  var lat2 = Math.asin( Math.sin(lat1)*Math.cos(distance/R) +
+            Math.cos(lat1)*Math.sin(distance/R)*
             Math.cos(bearing * Math.PI/180) );
   var lon2 = lon1 + Math.atan2(Math.sin(bearing * Math.PI/180)*Math.sin(distance/R)*
-            Math.cos(lat1 * Math.PI/180), Math.cos(distance/R)-
-            Math.sin(lat1* Math.PI/180)*Math.sin(lat2 * Math.PI/180));
-  return {lat:lat2, lng:lon2};
+            Math.cos(lat1), Math.cos(distance/R)-
+            Math.sin(lat1)*Math.sin(lat2));
+  //console.log("stuff: " + Math.sin(bearing * Math.PI/180), Math.sin(distance/R))
+  return {lat:(lat2 * 180 / Math.PI), lng:(lon2 * 180 / Math.PI)};
+
 }
-//This function uses 4 spaces
+
 function readCSV(path) {
-    //path = __dirname + "/" + path;
-    var data;
-    var csv = []
-    try {
-        data = fs.readFileSync(path, 'utf8');
-        lines = data.split("\n");
-        for(var i=0; i<lines.length;i++) {
-            csv.push(lines[i].split(","));
-        }
-    } catch(e) {
-        console.log('Error:', e.stack);
-        return;
-    }
-    console.log("Loaded: " + path);
-    return csv;
+  var csv;
+  // fill in
+
+  return csv;
 }
 
 function getValue(lat, lon, array) {
@@ -110,10 +102,11 @@ function drawShape() {
 
 }
 
-function getSlope(lat1, lon1) {
-  var slope;
-
-  return slope;
+function getSlope(lat, lon, bearing) {
+  var elev1 = getElevation(lat1, lon1);
+  var pos2 = calcNewPosition(lat, lon, bearing, 50);
+  var elev2 = getElevation(pos2[0], pos2[1]);
+  return 0;
 }
 
 function getSlopeFactor(angle) {
@@ -126,11 +119,15 @@ function getSlopeFactor(angle) {
 
 function predict(lat, lon, timeDifference) {
   // get VALUES
-  var humidity, temp, windU, windV;
+  var humidity, temp, windU, windV, windSpeed, windBearing;
   humidity = getValue(lat, lon, humidityArray);
   temp = getValue(lat, lon, tempArray);
   windU = getValue(lat, lon, windUArray);
   windV = getValue(lat, long, windVArray);
+
+  windSpeed = Math.sqrt(windU * windU + windV * windV);
+  windBearing = Math.atan2(windU, windV) * 180 / Math.PI;
+
   var angle = 0;
   // get slopes
 
@@ -138,14 +135,13 @@ function predict(lat, lon, timeDifference) {
 
   for(var i = 0; i < 8; ++i) {
     // get slopes
-
+    var slope = getSlope(lat, lon, angle);
     // get rates
 
     // get point as lat, lon
   }
 }
 exports.test = function () {
-  var sf = getSlopeFactor(5);
-  var rate = getRate(sf, 303, 50, 10);
-  console.log("sf: " + sf + ", rate: " + rate);
+
+
 };
