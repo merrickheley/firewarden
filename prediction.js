@@ -45,7 +45,7 @@ function calcNewPosition(lat1, lon1, bearing, distance) {
   var lon2 = lon1 + Math.atan2(Math.sin(bearing * Math.PI/180)*Math.sin(distance/R)*
             Math.cos(lat1 * Math.PI/180), Math.cos(distance/R)-
             Math.sin(lat1* Math.PI/180)*Math.sin(lat2 * Math.PI/180));
-  return [lat2, lon2];
+  return {lat:lat2, lng:lon2};
 }
 //This function uses 4 spaces
 function readCSV(path) {
@@ -83,6 +83,14 @@ function getRate(slopeFactor, temp, humidity, windSpeed) {
   var k=2*(Math.exp((0.987*Math.log(h+0.001))-0.45-(0.0345*c)+(0.0338*b)+(0.0234*d)));
 
   return rate = 0.0012 * k * slopeFactor * fuelLoad;
+}
+
+function getPointsAroundPosition(pos, dist) {
+    var points = [];
+    for(angle = 0; angle<360; angle+=45) {
+        points.push(calcNewPosition(pos.lat, pos.lng, angle, dist));
+    }
+    return points;
 }
 
 // Needs to be enconded as [{ lat: lat, lng: }]
