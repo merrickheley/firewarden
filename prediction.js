@@ -101,7 +101,9 @@ function getElevation(latLngs) {
   // go to google and get elevation in m
 	return new Promise(function (resolve,reject) {
 		googleMapsClient.elevation(
-			latLngs,
+		   	{
+				locations: latLngs
+			},
 			function (err,response) {
 				if (err) reject(err);
 				resolve(response);
