@@ -3,11 +3,26 @@ var tempArray;
 var windUArray;
 var windVArray;
 
-function initialise() {
-  humidityArray = readCSV("data/Relativehumiditylevel97500PA.csv");
-  tempArray = readCSV("data/Temparaturelevel97500Pa.csv");
-  windUArray = readCSV("data/Ucomponentofwindlevel97500PA.csv");
-  windVArray = readCSV("data/Vcomponentofwindlevel97500.csv");
+
+var fs = require('fs');
+
+var googleMapsClient = require('@google/maps').createClient({
+  key: 'AIzaSyB8Xam62TS4-Hl6K9SdE-hBurybdDVT6gQ'
+});
+
+exports.initialise = function() {
+    console.log("asd");
+  humidityArray = readCSV("Relativehumiditylevel97500Pa.csv");
+  tempArray = readCSV("Temperaturelevel97500Pa.csv");
+  windUArray = readCSV("Ucomponentofwindlevel97500Pa.csv");
+  windVArray = readCSV("Vcomponentofwindlevel97500Pa.csv");
+}
+
+exports.coolTests = function () {
+    return;
+    console.log(humidityArray.length);
+    console.log(humidityArray[0].length);
+    console.log(getValue(-27,355, humidityArray));
 }
 
 
@@ -16,67 +31,129 @@ function calcDistance(lat1, lat2, lon1, lon2) {
   var dLat = (lat2 - lat1) * Math.PI/180;
   var dLon = (lon2 - lon1) * Math.PI/180;
   var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) *
+          Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
           Math.sin(dLon / 2) * Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
   return d;
 }
 
-
-//φ is latitude, λ is longitude, θ is the bearing (clockwise from north), δ is the angular distance d/R; d being the distance travelled, R the earth’s radius
-
 function calcNewPosition(lat1, lon1, bearing, distance) {
   var R = 6371000; // m
-  var lat2 = Math.asin( Math.sin(lat1)*Math.cos(distance/R) + Math.cos(lat1)*Math.sin(distance/R)*Math.cos(bearing) );
-  var lon2 = lon1 + Math.atan2(Math.sin(bearing)*Math.sin(distance/R)*Math.cos(lat1), Math.cos(distance/R)-Math.sin(lat1)*Math.sin(lat2));
-  return {lat2, lon2};
+  lat1 = lat1 * Math.PI / 180;
+  lon1 = lon1 * Math.PI / 180;
+  var lat2 = Math.asin( Math.sin(lat1)*Math.cos(distance/R) +
+            Math.cos(lat1)*Math.sin(distance/R)*
+            Math.cos(bearing * Math.PI/180) );
+  var lon2 = lon1 + Math.atan2(Math.sin(bearing * Math.PI/180)*Math.sin(distance/R)*
+            Math.cos(lat1), Math.cos(distance/R)-
+            Math.sin(lat1)*Math.sin(lat2));
+  //console.log("stuff: " + Math.sin(bearing * Math.PI/180), Math.sin(distance/R))
+  return {lat:(lat2 * 180 / Math.PI), lng:(lon2 * 180 / Math.PI)};
 
 }
 
 function readCSV(path) {
-  var csv;
-  // fill in
-
-  return csv;
+    var data;
+    var csv = []
+    try {
+        data = fs.readFileSync(path, 'utf8');
+        lines = data.split("\n");
+        for(var i=0; i<lines.length;i++) {
+                csv.push(lines[i].split(","));
+            }
+    } catch(e) {
+        console.log('Error:', e.stack);
+        return;
+    }
+    console.log("Loaded: " + path);
+    return csv;
 }
 
 function getValue(lat, lon, array) {
-  return array[Math.floor(lat)][Math.floor(lon)];
+    if(lat < -90 | lat > 90 | lon < 0 | lon > 360) {
+        console.log("lat,long out of bounds:",lat,lon);
+    }
+  return array[Math.floor(lat+90)][Math.floor(lon)];
 }
 
-function rate(slope, temp, humidity, windSpeed) {
-  return 0;
+function getRate(slopeFactor, temp, humidity, windSpeed) {
+  var h = 5; // drought factor
+  var c = humidity;
+  var d = windSpeed * 3.6; // km/h
+  var b = temp - 273; // degrees c
+  var fuelLoad = 12.5; // estimated
+
+  var k=2*(Math.exp((0.987*Math.log(h+0.001))-0.45-(0.0345*c)+(0.0338*b)+(0.0234*d)));
+
+  return rate = 0.0012 * k * slopeFactor * fuelLoad;
 }
 
-function getElevation() {
+function getPointsAroundPosition(pos, dist) {
+    var points = [];
+    for(angle = 0; angle<360; angle+=45) {
+        points.push(calcNewPosition(pos.lat, pos.lng, angle, dist));
+    }
+    return points;
+}
+
+// Needs to be enconded as [{ lat: lat, lng: }]
+function getElevation(latLngs) {
   // go to google and get elevation in m
-
-  return 0;
+	return new Promise(function (resolve,reject) {
+		googleMapsClient.elevation(
+			latLngs,
+			function (err,response) {
+				if (err) reject(err);
+				resolve(response);
+		});
+	});
 }
 
 function drawShape() {
 
 }
 
-function getSlope(lat1, lat2, lon1, lon2) {
-  var slope;
+function getSlope(lat, lon, bearing) {
+  var elev1 = getElevation(lat1, lon1);
+  var pos2 = calcNewPosition(lat, lon, bearing, 50);
+  var elev2 = getElevation(pos2[0], pos2[1]);
+  return 0;
+}
 
-
-  return slope;
+function getSlopeFactor(angle) {
+  if(angle >= 0) {
+    return Math.exp(0.069 * angle)
+  } else {
+    return Math.exp(-0.069 * angle) / (2 * Math.exp(-0.069 * angle) - 1)
+  }
 }
 
 function predict(lat, lon, timeDifference) {
   // get VALUES
-  var humidity, temp, windU, windV;
+  var humidity, temp, windU, windV, windSpeed, windBearing;
   humidity = getValue(lat, lon, humidityArray);
   temp = getValue(lat, lon, tempArray);
   windU = getValue(lat, lon, windUArray);
   windV = getValue(lat, long, windVArray);
 
+  windSpeed = Math.sqrt(windU * windU + windV * windV);
+  windBearing = Math.atan2(windU, windV) * 180 / Math.PI;
+
+  var angle = 0;
   // get slopes
 
-  // get rates
+  var slopes = [];
 
-  // draw shape
+  for(var i = 0; i < 8; ++i) {
+    // get slopes
+    var slope = getSlope(lat, lon, angle);
+    // get rates
+
+    // get point as lat, lon
+  }
 }
+exports.test = function () {
+
+
+};

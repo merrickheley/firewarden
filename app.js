@@ -113,8 +113,27 @@ wss.on('connection', function connection(ws) {
           console.log('received: %s', message);
       }
 
-  });
+	db.getAllFires(function (err,rows) {
+		var fires = [];
+		rows.forEach(function (row) {
+			var fire = {
+				id: row["id"],
+				time: row["time"],
+				lat: row["latitude"],
+				lng: row["longitude"]
+			};
+			fires.push(fire);
+			console.log("T:" + row["time"] + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+		});
+		ws.send(JSON.stringify( {
+			points: fires,
+			polygons: [fires]
+		}));
+	});
 });
+
+predict.initialise();
+predict.coolTests();
 
 app.listen(3002);
 

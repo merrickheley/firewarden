@@ -56,3 +56,7 @@ exports.getAllFires = function (func, startTime, endTime) {
     this.db.each("SELECT * FROM FireLog WHERE time BETWEEN " + startTime +
         " AND " + endTime + ";", func);
 }
+
+exports.getAllFires = function (func) {
+    this.db.all("SELECT * FROM FireLog", func);
+}
