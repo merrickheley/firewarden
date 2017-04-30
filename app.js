@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var predict = require('./prediction')
 
 const http = require('http');
 const url = require('url');
@@ -65,6 +66,10 @@ app.use(function(err, req, res, next) {
 var wss = new WebSocket.Server({server:"127.0.0.1", port:3001});
 console.log("created websocket");
 
+//List of all known fire locations with a timestamp
+var locations = [];
+
+
 //send webpage on landing
 app.get('/',function(req,res){
      res.sendFile('index.jade');
@@ -81,6 +86,7 @@ wss.on('connection', function connection(ws) {
   // You might use location.query.access_token to authenticate or share sessions
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
+  //run when a new message is received
   ws.on('message', function incoming(message) {
 	  var fires = JSON.parse(message);
 	  fires.forEach(function (fire) {
@@ -108,6 +114,8 @@ wss.on('connection', function connection(ws) {
 	});
   //ws.send(fires);
 });
+
+predict.initialise();
 
 app.listen(3002);
 

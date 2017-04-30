@@ -36,10 +36,15 @@ body {
     height: 50px;
 }
 
-#sldTimeline {
-    width: 100% !important;
+#tmlParent {
+    width: 70%;
+    display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+#sldTimeline {
+    width: 100% !important;
 }
 
 #sldTimeline .slider-tick-label-container {
