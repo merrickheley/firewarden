@@ -80,6 +80,7 @@ app.get('/#contact',function(req,res){
 function sendFires(ws, startTime, endTime) {
     return db.getAllFires(function (err, rows) {
         var fires = [];
+        var polygons = [];
         rows.forEach(function (row) {
             var fire = {
                 id: row["id"],
@@ -88,11 +89,13 @@ function sendFires(ws, startTime, endTime) {
                 lng: row["longitude"]
             };
             fires.push(fire);
+            polygons.push(getPrediction({fire.lat, fire.lng}, (endTime-fire.time)/1000));
             console.log("T:" + (new Date(row["time"])).toLocaleString() + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
         });
+
         ws.send(JSON.stringify({
             points: fires,
-            polygons: [fires]
+            polygons: polygons
         }));
     }, startTime, endTime);
 }
@@ -113,7 +116,7 @@ wss.on('connection', function connection(ws) {
       // Handle a request for new fires
       if (fires['startTime'] != undefined) {
           console.log("getting fires", (new Date(fires.startTime)).toLocaleString(), (new Date(fires.endTime)).toLocaleString());
-          fires = sendFires(ws, fires.startTime, fires.endTime);    
+          fires = sendFires(ws, fires.startTime, fires.endTime);
       }
       else {
           fires.forEach(function (fire) {
@@ -123,7 +126,7 @@ wss.on('connection', function connection(ws) {
       }
   });
 
-	
+
 });
 
 predict.initialise();
