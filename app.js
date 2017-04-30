@@ -17,10 +17,9 @@ var app = express();
 
 // Set up the database
 var db = require('./database').init();
-
-
-
-//db.logFire(123456857, 123.45, 67.89);
+//db.logFire(Date.now() - 1000 * 60 * 60 * 1, -37.283603, 145.729220);
+//db.logFire(Date.now() - 1000 * 60 * 60 * 2, -37.283603, 145.829220);
+//db.logFire(Date.now() - 1000 * 60 * 60 * 3, -37.283603, 145.929220);
 //db.getAllFires();
 
 // Close the database. Good practice.
@@ -78,18 +77,42 @@ app.get('/#contact',function(req,res){
      res.sendFile('contact.jade');
 });
 
+function sendFires(ws, startTime, endTime) {
+    return db.getAllFires(function (err, row) {
+        ws.send(JSON.stringify([{
+            time: row["time"],
+            lat: row["latitude"],
+            lng: row["longitude"]
+        }]));
+        console.log("T:" + (new Date(row["time"])).toLocaleString() + ", Lat:" + row['latitude'] + ", Lon:" + row['longitude']);
+    }, startTime, endTime); 
+}
+
 wss.on('connection', function connection(ws) {
   const location = url.parse(ws.upgradeReq.url, true);
   // You might use location.query.access_token to authenticate or share sessions
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
+  var tmpDate = new Date();
+
+  var fires = sendFires(ws, tmpDate.getTime() - 1000 * 60 * 60 * 24, tmpDate.getTime());
+
   //run when a new message is received
   ws.on('message', function incoming(message) {
-	  var fires = JSON.parse(message);
-	  fires.forEach(function (fire) {
-		db.logFire(Date.now(),fire.lat,fire.lng);
-	  });
-    console.log('received: %s', message);
+      var fires = JSON.parse(message);
+
+      // Handle a request for new fires
+      if (fires['startTime'] != undefined) {
+          console.log("getting fires", (new Date(fires.startTime)).toLocaleString(), (new Date(fires.endTime)).toLocaleString());
+          fires = sendFires(ws, fires.startTime, fires.endTime);    
+      }
+      else {
+          fires.forEach(function (fire) {
+              db.logFire(Date.now(), fire.lat, fire.lng);
+          });
+          console.log('received: %s', message);
+      }
+
   });
 
 	db.getAllFires(function (err,rows) {
@@ -109,7 +132,6 @@ wss.on('connection', function connection(ws) {
 			polygons: [fires]
 		}));
 	});
-  //ws.send(fires);
 });
 
 predict.initialise();

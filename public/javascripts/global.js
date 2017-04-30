@@ -149,6 +149,12 @@ class WardenLocations {
         this.firepoints.push(marker);
     }
 
+    requestFirePoints(startTime, endTime) {
+        ws.send(JSON.stringify({
+            startTime: startTime,
+            endTime: endTime,
+        }));
+
     drawFirePolygon(points) {
         var poly = new google.maps.Polygon( {
             paths:points,
