@@ -8,6 +8,8 @@ html
     script(src='/javascripts/global.js')
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js')
     script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js')
+    link(rel='stylesheet', href='/stylesheets/highRes.css', media='only screen and (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2)')
+    meta(name='viewport', content='width=device-width, initial-scale=1') 
   body
 
 
@@ -93,6 +95,7 @@ html
                 ticks: [timestamp-day, timestamp, timestamp+day],
                 ticks_labels: ['-24H', date.toLocaleTimeString() + " " + formatDate(date), '+24H'],
                 ticks_snap_bounds: 20, // 10 minutes
+                step: 30,
                 formatter: function(value) {
                     var tmpDate = new Date(value*1000*60);
                     return tmpDate.toLocaleTimeString() + " " + formatDate(tmpDate);
